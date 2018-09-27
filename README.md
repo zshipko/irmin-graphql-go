@@ -17,6 +17,8 @@ package main
 
 import (
     "fmt"
+    "context"
+
     "github.com/zshipko/irmin-go"
 )
 
@@ -26,7 +28,7 @@ func main(){
         panic("Unable to connect to irmin-graphql server")
     }
 
-    master := client.Master()
+    master := client.Master(context.Background())
     fmt.Println(master.Head.Hash)
 }
 ```
