@@ -11,5 +11,6 @@ func (k Key) ToString() string {
 }
 
 func NewKey(key string) Key {
+	key = strings.Trim(key, "/")
 	return strings.Split(key, "/")
 }

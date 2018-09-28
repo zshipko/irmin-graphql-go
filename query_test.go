@@ -17,10 +17,21 @@ func init() {
 func TestMaster(t *testing.T) {
 	master, err := client.Master(context.Background())
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if master.Name != "master" {
+		t.Error("Expected master branch")
+	}
+}
+
+func TestBranch(t *testing.T) {
+	master, err := client.Branch(context.Background(), "testing")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if master.Name != "testing" {
 		t.Error("Expected master branch")
 	}
 }
