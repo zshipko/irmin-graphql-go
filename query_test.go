@@ -7,10 +7,10 @@ import (
 
 var client *Irmin = nil
 
-func TestClient(t *testing.T) {
+func init() {
 	client = New("http://127.0.0.1:8080/graphql", nil)
 	if client == nil {
-		t.Error("Invalid client")
+		panic("Invalid client")
 	}
 }
 

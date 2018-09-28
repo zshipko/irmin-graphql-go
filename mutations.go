@@ -11,22 +11,17 @@ type Info struct {
 	Message graphql.String
 }
 
-func (ir Irmin) Set(ctx context.Context, branch string, key string, value string, info *Info) (*Commit, error) {
+func (ir Irmin) Set(ctx context.Context, branch string, key Key, value string, info *Info) (*Commit, error) {
 	type query struct {
-		Set struct {
-			Commit Commit
-		} `graphql:"Set(branch: $branch, key: $key, value: $value, info: $info)"`
+		Set Commit `graphql:"set(branch: $branch, key: $key, value: $value, info: $info)"`
 	}
 
 	var q query
 	vars := map[string]interface{}{
 		"branch": graphql.String(branch),
-		"key":    graphql.String(key),
+		"key":    graphql.String(key.ToString()),
 		"value":  graphql.String(value),
-	}
-
-	if info != nil {
-		vars["info"] = info
+		"info":   info,
 	}
 
 	err := ir.client.Mutate(ctx, &q, vars)
@@ -34,5 +29,5 @@ func (ir Irmin) Set(ctx context.Context, branch string, key string, value string
 		return nil, err
 	}
 
-	return &q.Set.Commit, nil
+	return &q.Set, nil
 }
