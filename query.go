@@ -70,7 +70,7 @@ func (ir Irmin) Commit(ctx context.Context, hash string) (*Commit, error) {
 }
 
 // branch(name: $name) { get(key: $key) }
-func (ir Irmin) Get(ctx context.Context, branch string, key Key) (string, error) {
+func (ir Irmin) Get(ctx context.Context, branch string, key Key) ([]byte, error) {
 	type query struct {
 		Branch struct {
 			Get graphql.String `graphql:"get(key: $key)"`
@@ -85,12 +85,12 @@ func (ir Irmin) Get(ctx context.Context, branch string, key Key) (string, error)
 
 	err := ir.client.Query(ctx, &q, vars)
 	if err != nil {
-		return "", err
+		return []byte{}, err
 	}
 
-	if q.Branch.Get == "" {
-		return "", NotFound
+	if len(q.Branch.Get) == 0 {
+		return []byte{}, NotFound
 	}
 
-	return string(q.Branch.Get), nil
+	return []byte(q.Branch.Get), nil
 }

@@ -12,7 +12,7 @@ type Info struct {
 	Message graphql.String
 }
 
-func (ir Irmin) Set(ctx context.Context, branch string, key Key, value string, info *Info) (*Commit, error) {
+func (ir Irmin) Set(ctx context.Context, branch string, key Key, value []byte, info *Info) (*Commit, error) {
 	type query struct {
 		Set Commit `graphql:"set(branch: $branch, key: $key, value: $value, info: $info)"`
 	}

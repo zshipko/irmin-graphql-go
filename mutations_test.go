@@ -7,7 +7,7 @@ import (
 )
 
 func TestSet(t *testing.T) {
-	commit, err := client.Set(context.Background(), "master", NewKey("a/b/c"), "123", nil)
+	commit, err := client.Set(context.Background(), "master", NewKey("a/b/c"), []byte("123"), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -30,7 +30,7 @@ func TestSet(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if value != "123" {
+	if string(value) != "123" {
 		t.Error("Incorrect value after call to set")
 	}
 }
@@ -58,7 +58,7 @@ func TestRemove(t *testing.T) {
 }
 
 func TestPull(t *testing.T) {
-	client.Set(context.Background(), "master", NewKey("README.md"), "something", nil)
+	client.Set(context.Background(), "master", NewKey("README.md"), []byte("something"), nil)
 
 	commit, err := client.Pull(context.Background(), "master", "git://github.com/zshipko/irmin-go.git")
 	if err != nil {
@@ -71,7 +71,7 @@ func TestPull(t *testing.T) {
 
 	value, _ := client.Get(context.Background(), "master", NewKey("README.md"))
 	readme, _ := ioutil.ReadFile("README.md")
-	if value != string(readme) {
+	if string(value) != string(readme) {
 		t.Fatal("Pull failed")
 	}
 }
