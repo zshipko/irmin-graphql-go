@@ -20,7 +20,7 @@ func TestMaster(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if master.Name != "master" {
+	if string(master.Name) != "master" {
 		t.Error("Expected master branch")
 	}
 }

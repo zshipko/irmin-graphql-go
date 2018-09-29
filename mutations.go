@@ -2,6 +2,7 @@ package irmin
 
 import (
 	"context"
+	"errors"
 
 	"github.com/shurcooL/graphql"
 )
@@ -50,4 +51,85 @@ func (ir Irmin) Remove(ctx context.Context, branch string, key Key, info *Info) 
 	}
 
 	return &q.Remove, nil
+}
+
+func (ir Irmin) Merge(ctx context.Context, branch string, fromBranch string, info *Info) (*Commit, error) {
+	type query struct {
+		Merge Commit `graphql:"merge(branch: $branch, from: $from, info: $info)"`
+	}
+
+	var q query
+	vars := map[string]interface{}{
+		"branch": graphql.String(branch),
+		"from":   fromBranch,
+		"info":   info,
+	}
+
+	err := ir.client.Mutate(ctx, &q, vars)
+	if err != nil {
+		return nil, err
+	}
+
+	return &q.Merge, nil
+}
+
+func (ir Irmin) Revert(ctx context.Context, branch string, hash string) (*Commit, error) {
+	type query struct {
+		Revert Commit `graphql:"revert(branch: $branch, commit: $commit)"`
+	}
+
+	var q query
+	vars := map[string]interface{}{
+		"branch": graphql.String(branch),
+		"commit": graphql.String(hash),
+	}
+
+	err := ir.client.Mutate(ctx, &q, vars)
+	if err != nil {
+		return nil, err
+	}
+
+	return &q.Revert, nil
+}
+
+func (ir Irmin) Pull(ctx context.Context, branch string, remote string) (*Commit, error) {
+	type query struct {
+		Pull Commit `graphql:"pull(branch: $branch, remote: $remote)"`
+	}
+
+	var q query
+	vars := map[string]interface{}{
+		"branch": graphql.String(branch),
+		"remote": graphql.String(remote),
+	}
+
+	err := ir.client.Mutate(ctx, &q, vars)
+	if err != nil {
+		return nil, err
+	}
+
+	return &q.Pull, nil
+}
+
+func (ir Irmin) Push(ctx context.Context, branch string, remote string) error {
+	type query struct {
+		Push graphql.String `graphql:"pull(branch: $branch, remote: $remote)"`
+	}
+
+	var q query
+	vars := map[string]interface{}{
+		"branch": graphql.String(branch),
+		"remote": graphql.String(remote),
+	}
+
+	err := ir.client.Mutate(ctx, &q, vars)
+	if err != nil {
+		return err
+	}
+
+	if q.Push != "" {
+		return errors.New(string(q.Push))
+	}
+
+	return nil
 }

@@ -2,6 +2,7 @@ package irmin
 
 import (
 	"context"
+	"io/ioutil"
 	"testing"
 )
 
@@ -15,7 +16,7 @@ func TestSet(t *testing.T) {
 		t.Fatal("Invalid commit hash")
 	}
 
-	master, err := client.Master(context.Background())
+	master, err := client.Branch(context.Background(), "master")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -35,7 +36,7 @@ func TestSet(t *testing.T) {
 }
 
 func TestRemove(t *testing.T) {
-	master, err := client.Master(context.Background())
+	master, err := client.Branch(context.Background(), "master")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,4 +55,23 @@ func TestRemove(t *testing.T) {
 		t.Errorf("Expected a/b/c to be removed, instead got '%s'", value)
 	}
 
+}
+
+func TestPull(t *testing.T) {
+	client.Set(context.Background(), "master", NewKey("README.md"), "something", nil)
+
+	commit, err := client.Pull(context.Background(), "master", "git://github.com/zshipko/irmin-go.git")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if commit.Hash == "" {
+		t.Fatal("Expected new commit hash")
+	}
+
+	value, _ := client.Get(context.Background(), "master", NewKey("README.md"))
+	readme, _ := ioutil.ReadFile("README.md")
+	if value != string(readme) {
+		t.Fatal("Pull failed")
+	}
 }
