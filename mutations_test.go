@@ -51,7 +51,7 @@ func TestRemove(t *testing.T) {
 	}
 
 	value, err := client.Get(context.Background(), "master", NewKey("a/b/c"))
-	if err != NotFound {
+	if err != ErrNotFound {
 		t.Errorf("Expected a/b/c to be removed, instead got '%s'", value)
 	}
 

@@ -7,18 +7,22 @@ import (
 	"github.com/shurcooL/graphql"
 )
 
+// Commit is used in queries that return commit information
 type Commit struct {
 	Hash graphql.String
+	Info Info
 }
 
+// Branch is used in queries that return branch information
 type Branch struct {
 	Name graphql.String
 	Head Commit
 }
 
-var NotFound error = errors.New("Not found")
+// ErrNotFound is returned when a key is not available
+var ErrNotFound = errors.New("Not found")
 
-// master { ... }
+// Master - master { ... }
 func (ir Irmin) Master(ctx context.Context) (*Branch, error) {
 	type query struct {
 		Master Branch
@@ -33,7 +37,7 @@ func (ir Irmin) Master(ctx context.Context) (*Branch, error) {
 	return &q.Master, nil
 }
 
-// branch(name: $name)
+// Branch - branch(name: $name)
 func (ir Irmin) Branch(ctx context.Context, name string) (*Branch, error) {
 	type query struct {
 		Branch Branch `graphql:"branch(name: $name)"`
@@ -51,7 +55,7 @@ func (ir Irmin) Branch(ctx context.Context, name string) (*Branch, error) {
 	return &q.Branch, nil
 }
 
-// commit(hash: $hash)
+// Commit - commit(hash: $hash)
 func (ir Irmin) Commit(ctx context.Context, hash string) (*Commit, error) {
 	type query struct {
 		Commit Commit `graphql:"commit(hash: $hash)"`
@@ -69,7 +73,7 @@ func (ir Irmin) Commit(ctx context.Context, hash string) (*Commit, error) {
 	return &q.Commit, nil
 }
 
-// branch(name: $name) { get(key: $key) }
+// Get - branch(name: $name) { get(key: $key) }
 func (ir Irmin) Get(ctx context.Context, branch string, key Key) ([]byte, error) {
 	type query struct {
 		Branch struct {
@@ -89,7 +93,7 @@ func (ir Irmin) Get(ctx context.Context, branch string, key Key) ([]byte, error)
 	}
 
 	if len(q.Branch.Get) == 0 {
-		return []byte{}, NotFound
+		return []byte{}, ErrNotFound
 	}
 
 	return []byte(q.Branch.Get), nil

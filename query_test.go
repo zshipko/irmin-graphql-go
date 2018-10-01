@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-var client *Irmin = nil
+var client *Irmin
 
 func init() {
 	client = New("http://127.0.0.1:8080/graphql", nil)

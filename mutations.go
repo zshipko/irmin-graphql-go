@@ -7,11 +7,13 @@ import (
 	"github.com/shurcooL/graphql"
 )
 
+// Info stores commit information
 type Info struct {
 	Author  graphql.String
 	Message graphql.String
 }
 
+// Set a key
 func (ir Irmin) Set(ctx context.Context, branch string, key Key, value []byte, info *Info) (*Commit, error) {
 	type query struct {
 		Set Commit `graphql:"set(branch: $branch, key: $key, value: $value, info: $info)"`
@@ -33,6 +35,7 @@ func (ir Irmin) Set(ctx context.Context, branch string, key Key, value []byte, i
 	return &q.Set, nil
 }
 
+// Remove a key
 func (ir Irmin) Remove(ctx context.Context, branch string, key Key, info *Info) (*Commit, error) {
 	type query struct {
 		Remove Commit `graphql:"remove(branch: $branch, key: $key, info: $info)"`
@@ -53,6 +56,7 @@ func (ir Irmin) Remove(ctx context.Context, branch string, key Key, info *Info) 
 	return &q.Remove, nil
 }
 
+// Merge two branches
 func (ir Irmin) Merge(ctx context.Context, branch string, fromBranch string, info *Info) (*Commit, error) {
 	type query struct {
 		Merge Commit `graphql:"merge(branch: $branch, from: $from, info: $info)"`
@@ -73,6 +77,7 @@ func (ir Irmin) Merge(ctx context.Context, branch string, fromBranch string, inf
 	return &q.Merge, nil
 }
 
+// Revert to the given snapshot
 func (ir Irmin) Revert(ctx context.Context, branch string, hash string) (*Commit, error) {
 	type query struct {
 		Revert Commit `graphql:"revert(branch: $branch, commit: $commit)"`
@@ -92,6 +97,7 @@ func (ir Irmin) Revert(ctx context.Context, branch string, hash string) (*Commit
 	return &q.Revert, nil
 }
 
+// Pull from a remote store
 func (ir Irmin) Pull(ctx context.Context, branch string, remote string) (*Commit, error) {
 	type query struct {
 		Pull Commit `graphql:"pull(branch: $branch, remote: $remote)"`
@@ -111,6 +117,7 @@ func (ir Irmin) Pull(ctx context.Context, branch string, remote string) (*Commit
 	return &q.Pull, nil
 }
 
+// Push to a remote store
 func (ir Irmin) Push(ctx context.Context, branch string, remote string) error {
 	type query struct {
 		Push graphql.String `graphql:"pull(branch: $branch, remote: $remote)"`
