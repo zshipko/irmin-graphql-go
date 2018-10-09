@@ -1,13 +1,15 @@
 package irmin
 
 import (
-	"github.com/shurcooL/graphql"
+	"context"
 	"net/http"
+
+	"github.com/shurcooL/graphql"
 )
 
 // Irmin client
 type Irmin struct {
-	client *graphql.Client
+	Client *graphql.Client
 }
 
 // New creates a new Irmin client
@@ -18,6 +20,40 @@ func New(url string, conn *http.Client) *Irmin {
 	}
 
 	return &Irmin{
-		client: client,
+		Client: client,
+	}
+}
+
+// Commit - commit(hash: $hash)
+func (ir Irmin) Commit(ctx context.Context, hash string) (*Commit, error) {
+	type query struct {
+		Commit Commit `graphql:"commit(hash: $hash)"`
+	}
+
+	var q query
+	vars := map[string]interface{}{
+		"hash": graphql.String(hash),
+	}
+	err := ir.Client.Query(ctx, &q, vars)
+	if err != nil {
+		return nil, err
+	}
+
+	return &q.Commit, nil
+}
+
+// Branch returns a BranchRef, which is used to send queries/mutations
+func (ir *Irmin) Branch(name string) BranchRef {
+	return BranchRef{
+		Irmin: ir,
+		name:  name,
+	}
+}
+
+// Master returns a BranchRef for the master branch
+func (ir *Irmin) Master() BranchRef {
+	return BranchRef{
+		Irmin: ir,
+		name:  "master",
 	}
 }

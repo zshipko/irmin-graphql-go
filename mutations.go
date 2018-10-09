@@ -14,20 +14,19 @@ type Info struct {
 }
 
 // Set a key
-func (ir Irmin) Set(ctx context.Context, branch string, key Key, value []byte, info *Info) (*Commit, error) {
+func (br BranchRef) Set(ctx context.Context, key Key, value []byte, info *Info) (*Commit, error) {
 	type query struct {
 		Set Commit `graphql:"set(branch: $branch, key: $key, value: $value, info: $info)"`
 	}
 
 	var q query
 	vars := map[string]interface{}{
-		"branch": graphql.String(branch),
-		"key":    graphql.String(key.ToString()),
-		"value":  graphql.String(value),
-		"info":   info,
+		"key":   graphql.String(key.ToString()),
+		"value": graphql.String(value),
+		"info":  info,
 	}
 
-	err := ir.client.Mutate(ctx, &q, vars)
+	err := br.Mutate(ctx, &q, vars)
 	if err != nil {
 		return nil, err
 	}
@@ -36,19 +35,18 @@ func (ir Irmin) Set(ctx context.Context, branch string, key Key, value []byte, i
 }
 
 // Remove a key
-func (ir Irmin) Remove(ctx context.Context, branch string, key Key, info *Info) (*Commit, error) {
+func (br BranchRef) Remove(ctx context.Context, key Key, info *Info) (*Commit, error) {
 	type query struct {
 		Remove Commit `graphql:"remove(branch: $branch, key: $key, info: $info)"`
 	}
 
 	var q query
 	vars := map[string]interface{}{
-		"branch": graphql.String(branch),
-		"key":    graphql.String(key.ToString()),
-		"info":   info,
+		"key":  graphql.String(key.ToString()),
+		"info": info,
 	}
 
-	err := ir.client.Mutate(ctx, &q, vars)
+	err := br.Mutate(ctx, &q, vars)
 	if err != nil {
 		return nil, err
 	}
@@ -57,19 +55,18 @@ func (ir Irmin) Remove(ctx context.Context, branch string, key Key, info *Info) 
 }
 
 // Merge two branches
-func (ir Irmin) Merge(ctx context.Context, branch string, fromBranch string, info *Info) (*Commit, error) {
+func (br BranchRef) Merge(ctx context.Context, fromBranch string, info *Info) (*Commit, error) {
 	type query struct {
 		Merge Commit `graphql:"merge(branch: $branch, from: $from, info: $info)"`
 	}
 
 	var q query
 	vars := map[string]interface{}{
-		"branch": graphql.String(branch),
-		"from":   fromBranch,
-		"info":   info,
+		"from": fromBranch,
+		"info": info,
 	}
 
-	err := ir.client.Mutate(ctx, &q, vars)
+	err := br.Mutate(ctx, &q, vars)
 	if err != nil {
 		return nil, err
 	}
@@ -78,18 +75,17 @@ func (ir Irmin) Merge(ctx context.Context, branch string, fromBranch string, inf
 }
 
 // Revert to the given snapshot
-func (ir Irmin) Revert(ctx context.Context, branch string, hash string) (*Commit, error) {
+func (br BranchRef) Revert(ctx context.Context, hash string) (*Commit, error) {
 	type query struct {
 		Revert Commit `graphql:"revert(branch: $branch, commit: $commit)"`
 	}
 
 	var q query
 	vars := map[string]interface{}{
-		"branch": graphql.String(branch),
 		"commit": graphql.String(hash),
 	}
 
-	err := ir.client.Mutate(ctx, &q, vars)
+	err := br.Mutate(ctx, &q, vars)
 	if err != nil {
 		return nil, err
 	}
@@ -98,18 +94,17 @@ func (ir Irmin) Revert(ctx context.Context, branch string, hash string) (*Commit
 }
 
 // Pull from a remote store
-func (ir Irmin) Pull(ctx context.Context, branch string, remote string) (*Commit, error) {
+func (br BranchRef) Pull(ctx context.Context, remote string) (*Commit, error) {
 	type query struct {
 		Pull Commit `graphql:"pull(branch: $branch, remote: $remote)"`
 	}
 
 	var q query
 	vars := map[string]interface{}{
-		"branch": graphql.String(branch),
 		"remote": graphql.String(remote),
 	}
 
-	err := ir.client.Mutate(ctx, &q, vars)
+	err := br.Mutate(ctx, &q, vars)
 	if err != nil {
 		return nil, err
 	}
@@ -118,18 +113,17 @@ func (ir Irmin) Pull(ctx context.Context, branch string, remote string) (*Commit
 }
 
 // Push to a remote store
-func (ir Irmin) Push(ctx context.Context, branch string, remote string) error {
+func (br BranchRef) Push(ctx context.Context, remote string) error {
 	type query struct {
 		Push graphql.String `graphql:"pull(branch: $branch, remote: $remote)"`
 	}
 
 	var q query
 	vars := map[string]interface{}{
-		"branch": graphql.String(branch),
 		"remote": graphql.String(remote),
 	}
 
-	err := ir.client.Mutate(ctx, &q, vars)
+	err := br.Mutate(ctx, &q, vars)
 	if err != nil {
 		return err
 	}

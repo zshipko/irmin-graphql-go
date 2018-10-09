@@ -7,7 +7,7 @@ import (
 )
 
 func TestSet(t *testing.T) {
-	commit, err := client.Set(context.Background(), "master", NewKey("a/b/c"), []byte("123"), nil)
+	commit, err := master.Set(context.Background(), NewKey("a/b/c"), []byte("123"), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -16,16 +16,16 @@ func TestSet(t *testing.T) {
 		t.Fatal("Invalid commit hash")
 	}
 
-	master, err := client.Branch(context.Background(), "master")
+	info, err := master.Info(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if master.Head.Hash != commit.Hash {
+	if info.Head.Hash != commit.Hash {
 		t.Fatal("Commit hash doesn't match HEAD commit")
 	}
 
-	value, err := client.Get(context.Background(), "master", NewKey("a/b/c"))
+	value, err := master.Get(context.Background(), NewKey("a/b/c"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,21 +36,21 @@ func TestSet(t *testing.T) {
 }
 
 func TestRemove(t *testing.T) {
-	master, err := client.Branch(context.Background(), "master")
+	info, err := master.Info(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	commit, err := client.Remove(context.Background(), "master", NewKey("a/b/c"), nil)
+	commit, err := master.Remove(context.Background(), NewKey("a/b/c"), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if master.Head.Hash == commit.Hash {
+	if info.Head.Hash == commit.Hash {
 		t.Fatal("Expected new commit after remove")
 	}
 
-	value, err := client.Get(context.Background(), "master", NewKey("a/b/c"))
+	value, err := master.Get(context.Background(), NewKey("a/b/c"))
 	if err != ErrNotFound {
 		t.Errorf("Expected a/b/c to be removed, instead got '%s'", value)
 	}
@@ -58,9 +58,9 @@ func TestRemove(t *testing.T) {
 }
 
 func TestPull(t *testing.T) {
-	client.Set(context.Background(), "master", NewKey("README.md"), []byte("something"), nil)
+	master.Set(context.Background(), NewKey("README.md"), []byte("something"), nil)
 
-	commit, err := client.Pull(context.Background(), "master", "git://github.com/zshipko/irmin-go.git")
+	commit, err := master.Pull(context.Background(), "git://github.com/zshipko/irmin-go.git")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,7 +69,7 @@ func TestPull(t *testing.T) {
 		t.Fatal("Expected new commit hash")
 	}
 
-	value, _ := client.Get(context.Background(), "master", NewKey("README.md"))
+	value, _ := master.Get(context.Background(), NewKey("README.md"))
 	readme, _ := ioutil.ReadFile("README.md")
 	if string(value) != string(readme) {
 		t.Fatal("Pull failed")

@@ -2,33 +2,32 @@ package irmin
 
 import (
 	"context"
+
+	"github.com/shurcooL/graphql"
 )
 
 // BranchRef is a reference to the branch specified by `name`
 type BranchRef struct {
-	client *Irmin
-	name   string
+	*Irmin
+	name string
 }
 
-// GetBranch returns a BranchRef
-func (ir *Irmin) GetBranch(name string) BranchRef {
-	return BranchRef{
-		client: ir,
-		name:   name,
+// Query sends a query to the specified graphql server
+func (b BranchRef) Query(ctx context.Context, q interface{}, vars map[string]interface{}) error {
+	if vars == nil {
+		vars = map[string]interface{}{}
 	}
+
+	vars["branch"] = graphql.String(b.name)
+	return b.Client.Query(ctx, q, vars)
 }
 
-// Get a key
-func (b BranchRef) Get(ctx context.Context, key Key) ([]byte, error) {
-	return b.client.Get(ctx, b.name, key)
-}
+// Mutate sends a mutation to the specified graphql server
+func (b BranchRef) Mutate(ctx context.Context, q interface{}, vars map[string]interface{}) error {
+	if vars == nil {
+		vars = map[string]interface{}{}
+	}
 
-// Set a key
-func (b BranchRef) Set(ctx context.Context, key Key, value []byte, info *Info) (*Commit, error) {
-	return b.client.Set(ctx, b.name, key, value, info)
-}
-
-// Pull from a remote store
-func (b BranchRef) Pull(ctx context.Context, remote string) (*Commit, error) {
-	return b.client.Pull(ctx, b.name, remote)
+	vars["branch"] = graphql.String(b.name)
+	return b.Client.Mutate(ctx, q, vars)
 }
