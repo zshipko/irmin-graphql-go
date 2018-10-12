@@ -47,7 +47,7 @@ func (br BranchRef) Get(ctx context.Context, key Key) ([]byte, error) {
 
 	var q query
 	vars := map[string]interface{}{
-		"key": graphql.String(key.ToString()),
+		"key": key.ToString(),
 	}
 
 	err := br.Query(ctx, &q, vars)
@@ -60,4 +60,39 @@ func (br BranchRef) Get(ctx context.Context, key Key) ([]byte, error) {
 	}
 
 	return []byte(q.Branch.Get), nil
+}
+
+// List returns a list of the values stored under the specified key
+func (br BranchRef) List(ctx context.Context, key Key) (map[string][]byte, error) {
+	type query struct {
+		Branch struct {
+			Head struct {
+				Node struct {
+					Get struct {
+						Tree []struct {
+							Key   graphql.String
+							Value graphql.String
+						} `graphql:"tree"`
+					} `graphql:"get(key: $key)"`
+				} `graphql:"node"`
+			} `graphql:"head"`
+		} `graphql:"branch(name: $branch)"`
+	}
+
+	var q query
+	vars := map[string]interface{}{
+		"key": key.ToString(),
+	}
+
+	err := br.Query(ctx, &q, vars)
+	if err != nil {
+		return nil, err
+	}
+
+	items := map[string][]byte{}
+	for _, x := range q.Branch.Head.Node.Get.Tree {
+		items[*NewKey(string(x.Key)).ToString()] = []byte(x.Value)
+	}
+
+	return items, nil
 }

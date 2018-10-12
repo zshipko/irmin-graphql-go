@@ -28,12 +28,12 @@ func TestMaster(t *testing.T) {
 }
 
 func TestBranch(t *testing.T) {
-	master, err := client.Branch("testing").Info(context.Background())
+	testing, err := client.Branch("testing").Info(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if master.Name != "testing" {
+	if testing.Name != "testing" {
 		t.Error("Expected testing branch")
 	}
 }

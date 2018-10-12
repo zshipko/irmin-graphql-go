@@ -74,4 +74,19 @@ func TestPull(t *testing.T) {
 	if string(value) != string(readme) {
 		t.Fatal("Pull failed")
 	}
+
+	items, err := master.List(context.Background(), EmptyKey())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(items) == 0 {
+		t.Error("Expected items")
+	}
+
+	if string(items["README.md"]) != string(readme) {
+		t.Log(items)
+		t.Log(string(items["README.md"]))
+		t.Fatal("Incorrect list results")
+	}
 }

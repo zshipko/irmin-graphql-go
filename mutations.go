@@ -21,7 +21,7 @@ func (br BranchRef) Set(ctx context.Context, key Key, value []byte, info *Info) 
 
 	var q query
 	vars := map[string]interface{}{
-		"key":   graphql.String(key.ToString()),
+		"key":   key.ToString(),
 		"value": graphql.String(value),
 		"info":  info,
 	}
@@ -42,7 +42,7 @@ func (br BranchRef) Remove(ctx context.Context, key Key, info *Info) (*Commit, e
 
 	var q query
 	vars := map[string]interface{}{
-		"key":  graphql.String(key.ToString()),
+		"key":  key.ToString(),
 		"info": info,
 	}
 
