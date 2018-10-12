@@ -47,7 +47,7 @@ func (br BranchRef) Get(ctx context.Context, key Key) ([]byte, error) {
 
 	var q query
 	vars := map[string]interface{}{
-		"key": key.ToString(),
+		"key": key.Arg(),
 	}
 
 	err := br.Query(ctx, &q, vars)
@@ -81,7 +81,7 @@ func (br BranchRef) List(ctx context.Context, key Key) (map[string][]byte, error
 
 	var q query
 	vars := map[string]interface{}{
-		"key": key.ToString(),
+		"key": key.Arg(),
 	}
 
 	err := br.Query(ctx, &q, vars)
@@ -91,7 +91,7 @@ func (br BranchRef) List(ctx context.Context, key Key) (map[string][]byte, error
 
 	items := map[string][]byte{}
 	for _, x := range q.Branch.Head.Node.Get.Tree {
-		items[*NewKey(string(x.Key)).ToString()] = []byte(x.Value)
+		items[NewKey(string(x.Key)).ToString()] = []byte(x.Value)
 	}
 
 	return items, nil
