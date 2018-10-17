@@ -9,14 +9,20 @@ import (
 
 // Commit is used in queries that return commit information
 type Commit struct {
-	Hash graphql.String
+	Hash string
 	Info Info
 }
 
 // Branch is used in queries that return branch information
 type Branch struct {
-	Name graphql.String
+	Name string
 	Head Commit
+}
+
+// Contents is used to store contents + metadata
+type Contents struct {
+	Value    []byte
+	Metadata []byte
 }
 
 // ErrNotFound is returned when a key is not available
@@ -41,7 +47,7 @@ func (br BranchRef) Info(ctx context.Context) (*Branch, error) {
 func (br BranchRef) Get(ctx context.Context, key Key) ([]byte, error) {
 	type query struct {
 		Branch struct {
-			Get graphql.String `graphql:"get(key: $key)"`
+			Get *graphql.String `graphql:"get(key: $key)"`
 		} `graphql:"branch(name: $branch)"`
 	}
 
@@ -55,11 +61,42 @@ func (br BranchRef) Get(ctx context.Context, key Key) ([]byte, error) {
 		return []byte{}, err
 	}
 
-	if len(q.Branch.Get) == 0 {
+	if q.Branch.Get == nil {
 		return []byte{}, ErrNotFound
 	}
 
-	return []byte(q.Branch.Get), nil
+	return []byte(*q.Branch.Get), nil
+}
+
+// GetAll - branch(name: $branch) { get_all(key: $key) }
+func (br BranchRef) GetAll(ctx context.Context, key Key) (*Contents, error) {
+	type query struct {
+		Branch struct {
+			GetAll *struct {
+				Value    graphql.String
+				Metadata graphql.String
+			} `graphql:"get_all(key: $key)"`
+		} `graphql:"branch(name: $branch)"`
+	}
+
+	var q query
+	vars := map[string]interface{}{
+		"key": key.Arg(),
+	}
+
+	err := br.Query(ctx, &q, vars)
+	if err != nil {
+		return nil, err
+	}
+
+	if q.Branch.GetAll == nil {
+		return nil, ErrNotFound
+	}
+
+	return &Contents{
+		Value:    []byte(q.Branch.GetAll.Value),
+		Metadata: []byte(q.Branch.GetAll.Metadata),
+	}, nil
 }
 
 // List returns a list of the values stored under the specified key
