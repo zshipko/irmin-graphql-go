@@ -34,6 +34,28 @@ func (br BranchRef) Set(ctx context.Context, key Key, value []byte, info *Info) 
 	return &q.Set, nil
 }
 
+// SetAll allows you to set a key/value pair with metadata
+func (br BranchRef) SetAll(ctx context.Context, key Key, value []byte, metadata []byte, info *Info) (*Commit, error) {
+	type query struct {
+		SetAll Commit `graphql:"set(branch: $branch, key: $key, value: $value, metadata: $metadata, info: $info)"`
+	}
+
+	var q query
+	vars := map[string]interface{}{
+		"key":      key.Arg(),
+		"value":    graphql.String(value),
+		"metadata": graphql.String(metadata),
+		"info":     info,
+	}
+
+	err := br.Mutate(ctx, &q, vars)
+	if err != nil {
+		return nil, err
+	}
+
+	return &q.SetAll, nil
+}
+
 // Remove a key
 func (br BranchRef) Remove(ctx context.Context, key Key, info *Info) (*Commit, error) {
 	type query struct {
