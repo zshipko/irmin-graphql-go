@@ -42,6 +42,21 @@ func (ir Irmin) Commit(ctx context.Context, hash string) (*Commit, error) {
 	return &q.Commit, nil
 }
 
+// Branches returns with a list of available branches
+func (ir *Irmin) Branches(ctx context.Context) ([]string, error) {
+	type query struct {
+		Branches []string
+	}
+
+	var q query
+	err := ir.Client.Query(ctx, &q, nil)
+	if err != nil {
+		return []string{}, err
+	}
+
+	return q.Branches, nil
+}
+
 // Branch returns a BranchRef, which is used to send queries/mutations
 func (ir *Irmin) Branch(name string) BranchRef {
 	return BranchRef{
