@@ -25,6 +25,9 @@ type Contents struct {
 	Metadata []byte
 }
 
+// TreeMap is used in GetTree and SetTree to represent a listing of tree nodes
+type TreeMap map[string]Contents
+
 // ErrNotFound is returned when a key is not available
 var ErrNotFound = errors.New("Not found")
 
@@ -41,6 +44,40 @@ func (br BranchRef) Info(ctx context.Context) (*Branch, error) {
 	}
 
 	return &q.Branch, nil
+}
+
+// GetTree - branch(name: $branch) { get_tree(key: $key) }
+func (br BranchRef) GetTree(ctx context.Context, key Key) (TreeMap, error) {
+	type query struct {
+		Branch struct {
+			GetTree []struct {
+				Key      graphql.String
+				Value    graphql.String
+				Metadata graphql.String
+			} `graphql:"get_tree(key: $key)"`
+		} `graphql:"branch(name: $branch)"`
+	}
+
+	var q query
+	vars := map[string]interface{}{
+		"key": key.Arg(),
+	}
+
+	err := br.Query(ctx, &q, vars)
+	if err != nil {
+		return nil, err
+	}
+
+	items := map[string]Contents{}
+
+	for _, v := range q.Branch.GetTree {
+		items[NewKey(string(v.Key)).ToString()] = Contents{
+			Value:    []byte(v.Value),
+			Metadata: []byte(v.Metadata),
+		}
+	}
+
+	return items, nil
 }
 
 // Get - branch(name: $branch) { get(key: $key) }

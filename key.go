@@ -21,10 +21,6 @@ func (k Key) ToString() string {
 
 // Arg converts a key to a GraphQL query argument
 func (k Key) Arg() *graphql.String {
-	if len(k) == 0 {
-		return nil
-	}
-
 	return graphql.NewString(graphql.String(k.ToString()))
 }
 

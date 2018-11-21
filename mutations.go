@@ -34,6 +34,49 @@ func (br BranchRef) Set(ctx context.Context, key Key, value []byte, info *Info) 
 	return &q.Set, nil
 }
 
+// SetTree allows you to set multiple keys at the same time
+func (br BranchRef) SetTree(ctx context.Context, key Key, tree TreeMap, info *Info) (*Commit, error) {
+	type query struct {
+		SetTree Commit `graphql:"set_tree(branch: $branch, key: $key, tree: $tree, info: $info)"`
+	}
+
+	type TreeItem map[string]interface{}
+
+	treeArray := []TreeItem{}
+
+	for k, v := range tree {
+		var value *graphql.String
+		if v.Value != nil {
+			value = graphql.NewString(graphql.String(string(v.Value)))
+		}
+
+		var meta *graphql.String
+		if v.Metadata != nil {
+			meta = graphql.NewString(graphql.String(string(v.Metadata)))
+		}
+
+		treeArray = append(treeArray, TreeItem{
+			"key":      graphql.String(k),
+			"value":    value,
+			"metadata": meta,
+		})
+	}
+
+	var q query
+	vars := map[string]interface{}{
+		"key":  key.Arg(),
+		"tree": treeArray,
+		"info": info,
+	}
+
+	err := br.Mutate(ctx, &q, vars)
+	if err != nil {
+		return nil, err
+	}
+
+	return &q.SetTree, nil
+}
+
 // SetAll allows you to set a key/value pair with metadata
 func (br BranchRef) SetAll(ctx context.Context, key Key, value []byte, metadata []byte, info *Info) (*Commit, error) {
 	type query struct {
