@@ -13,6 +13,33 @@ type Info struct {
 	Message graphql.String
 }
 
+// TreeItem is used to encode tree contents int GraphQL queries
+type TreeItem map[string]interface{}
+
+func makeTreeArray(tree TreeMap) []TreeItem {
+	treeArray := []TreeItem{}
+
+	for k, v := range tree {
+		var value *graphql.String
+		if v.Value != nil {
+			value = graphql.NewString(graphql.String(string(v.Value)))
+		}
+
+		var meta *graphql.String
+		if v.Metadata != nil {
+			meta = graphql.NewString(graphql.String(string(v.Metadata)))
+		}
+
+		treeArray = append(treeArray, TreeItem{
+			"key":      graphql.String(k),
+			"value":    value,
+			"metadata": meta,
+		})
+	}
+
+	return treeArray
+}
+
 // Set a key
 func (br BranchRef) Set(ctx context.Context, key Key, value []byte, info *Info) (*Commit, error) {
 	type query struct {
@@ -34,33 +61,36 @@ func (br BranchRef) Set(ctx context.Context, key Key, value []byte, info *Info) 
 	return &q.Set, nil
 }
 
+// UpdateTree allows you to modify multiple keys at the same time
+func (br BranchRef) UpdateTree(ctx context.Context, key Key, tree TreeMap, info *Info) (*Commit, error) {
+	type query struct {
+		UpdateTree Commit `graphql:"update_tree(branch: $branch, key: $key, tree: $tree, info: $info)"`
+	}
+
+	treeArray := makeTreeArray(tree)
+
+	var q query
+	vars := map[string]interface{}{
+		"key":  key.Arg(),
+		"tree": treeArray,
+		"info": info,
+	}
+
+	err := br.Mutate(ctx, &q, vars)
+	if err != nil {
+		return nil, err
+	}
+
+	return &q.UpdateTree, nil
+}
+
 // SetTree allows you to set multiple keys at the same time
 func (br BranchRef) SetTree(ctx context.Context, key Key, tree TreeMap, info *Info) (*Commit, error) {
 	type query struct {
 		SetTree Commit `graphql:"set_tree(branch: $branch, key: $key, tree: $tree, info: $info)"`
 	}
 
-	type TreeItem map[string]interface{}
-
-	treeArray := []TreeItem{}
-
-	for k, v := range tree {
-		var value *graphql.String
-		if v.Value != nil {
-			value = graphql.NewString(graphql.String(string(v.Value)))
-		}
-
-		var meta *graphql.String
-		if v.Metadata != nil {
-			meta = graphql.NewString(graphql.String(string(v.Metadata)))
-		}
-
-		treeArray = append(treeArray, TreeItem{
-			"key":      graphql.String(k),
-			"value":    value,
-			"metadata": meta,
-		})
-	}
+	treeArray := makeTreeArray(tree)
 
 	var q query
 	vars := map[string]interface{}{
