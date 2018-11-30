@@ -21,3 +21,12 @@ func TestKeyRoundtrip(t *testing.T) {
 		t.Fatalf("key0 = %s, key2 = %s", a, c)
 	}
 }
+
+func TestWeirdKey(t *testing.T) {
+	key0 := NewKey("//a///b/c//")
+	expected := NewKey("a/b/c")
+
+	if key0.ToString() != expected.ToString() {
+		t.Fail()
+	}
+}

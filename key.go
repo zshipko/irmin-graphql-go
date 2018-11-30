@@ -27,7 +27,17 @@ func (k Key) Arg() *graphql.String {
 // NewKey creates a new key from a string
 func NewKey(key string) Key {
 	key = strings.Trim(key, "/")
-	return strings.Split(key, "/")
+	tmp := strings.Split(key, "/")
+	dest := []string{}
+
+	for _, c := range tmp {
+		if c != "" {
+			dest = append(dest, c)
+
+		}
+	}
+
+	return dest
 }
 
 // EmptyKey create a new empty key
