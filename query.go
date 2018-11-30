@@ -137,7 +137,7 @@ func (br BranchRef) GetAll(ctx context.Context, key Key) (*Contents, error) {
 }
 
 // List returns a list of the values stored under the specified key
-func (br BranchRef) List(ctx context.Context, key Key) (map[string][]byte, error) {
+func (br BranchRef) List(ctx context.Context, step *string) (map[string][]byte, error) {
 	type query struct {
 		Branch struct {
 			Head struct {
@@ -155,7 +155,7 @@ func (br BranchRef) List(ctx context.Context, key Key) (map[string][]byte, error
 
 	var q query
 	vars := map[string]interface{}{
-		"key": key.Arg(),
+		"key": step,
 	}
 
 	err := br.Query(ctx, &q, vars)

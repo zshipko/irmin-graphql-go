@@ -77,13 +77,13 @@ func TestPull(t *testing.T) {
 
 	// Check contents after pull using List/GetTree
 
-	items, err := master.List(context.Background(), EmptyKey())
+	items, err := master.List(context.Background(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	if len(items) == 0 {
-		t.Error("Expected items")
+		t.Fatal("Expected items")
 	}
 
 	if string(items["README.md"]) != string(readme) {
