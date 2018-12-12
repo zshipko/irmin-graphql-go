@@ -189,14 +189,15 @@ func (br BranchRef) Revert(ctx context.Context, hash string) (*Commit, error) {
 }
 
 // Pull from a remote store
-func (br BranchRef) Pull(ctx context.Context, remote string) (*Commit, error) {
+func (br BranchRef) Pull(ctx context.Context, remote string, info *Info) (*Commit, error) {
 	type query struct {
-		Pull Commit `graphql:"pull(branch: $branch, remote: $remote)"`
+		Pull Commit `graphql:"pull(branch: $branch, remote: $remote, info: $info)"`
 	}
 
 	var q query
 	vars := map[string]interface{}{
 		"remote": graphql.String(remote),
+		"info":   info,
 	}
 
 	err := br.Mutate(ctx, &q, vars)

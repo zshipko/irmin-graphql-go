@@ -46,14 +46,14 @@ func (br BranchRef) Info(ctx context.Context) (*Branch, error) {
 	return &q.Branch, nil
 }
 
-// GetTree - branch(name: $branch) { get_tree(key: $key) }
+// GetTree - branch(name: $branch) { get_tree(key: $key) { key, value, metadata } }
 func (br BranchRef) GetTree(ctx context.Context, key Key) (TreeMap, error) {
 	type query struct {
 		Branch struct {
 			GetTree []struct {
-				Key      graphql.String
-				Value    graphql.String
-				Metadata graphql.String
+				Key      graphql.String `graphql:"key"`
+				Value    graphql.String `graphql:"value"`
+				Metadata graphql.String `graphql:"metadata"`
 			} `graphql:"get_tree(key: $key)"`
 		} `graphql:"branch(name: $branch)"`
 	}

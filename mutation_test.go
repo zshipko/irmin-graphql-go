@@ -60,7 +60,7 @@ func TestRemove(t *testing.T) {
 func TestPull(t *testing.T) {
 	master.Set(context.Background(), NewKey("README.md"), []byte("something"), nil)
 
-	commit, err := master.Pull(context.Background(), "git://github.com/zshipko/irmin-go.git")
+	commit, err := master.Pull(context.Background(), "git://github.com/zshipko/irmin-go", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -87,8 +87,6 @@ func TestPull(t *testing.T) {
 	}
 
 	if string(items["README.md"]) != string(readme) {
-		t.Log(items)
-		t.Log(string(items["README.md"]))
 		t.Fatal("Incorrect list results")
 	}
 
@@ -98,6 +96,9 @@ func TestPull(t *testing.T) {
 	}
 
 	x, err := master.GetTree(context.Background(), EmptyKey())
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if string(x["README.md"].Value) != string(readme) {
 		t.Log(x)
