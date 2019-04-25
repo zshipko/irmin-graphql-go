@@ -149,10 +149,10 @@ func (br BranchRef) Remove(ctx context.Context, key Key, info *Info) (*Commit, e
 	return &q.Remove, nil
 }
 
-// Merge two branches
-func (br BranchRef) Merge(ctx context.Context, fromBranch string, info *Info) (*Commit, error) {
+// MergeWithBranch merges two branches
+func (br BranchRef) MergeWithBranch(ctx context.Context, fromBranch string, info *Info) (*Commit, error) {
 	type query struct {
-		Merge Commit `graphql:"merge(branch: $branch, from: $from, info: $info)"`
+		Merge Commit `graphql:"merge_with_branch(branch: $branch, from: $from, info: $info)"`
 	}
 
 	var q query
