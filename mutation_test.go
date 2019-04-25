@@ -30,7 +30,7 @@ func TestSet(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if string(value) != "123" {
+	if string(value.Value) != "123" {
 		t.Error("Incorrect value after call to set")
 	}
 }
@@ -71,7 +71,7 @@ func TestPull(t *testing.T) {
 
 	value, _ := master.Get(context.Background(), NewKey("README.md"))
 	readme, _ := ioutil.ReadFile("README.md")
-	if string(value) != string(readme) {
+	if value == nil || string(value.Value) != string(readme) {
 		t.Fatal("Pull failed")
 	}
 
@@ -117,9 +117,9 @@ func TestPull(t *testing.T) {
 }
 
 func TestSetTree(t *testing.T) {
-	key := NewKey("/foo")
+	key := EmptyKey()
 	tree := map[string]Contents{
-		"bar/baz": Contents{
+		"foo/bar/baz": Contents{
 			Value:    []byte("testing"),
 			Metadata: nil,
 		},
@@ -138,7 +138,7 @@ func TestSetTree(t *testing.T) {
 
 	for k, v := range x {
 		if string(v.Value) != string(tree[k].Value) {
-			t.Fatalf("Invalid value: %s", k)
+			t.Fatalf("Invalid value: %s, %s %s", k, string(v.Value), string(tree[k].Value))
 		}
 	}
 }
