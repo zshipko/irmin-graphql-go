@@ -56,7 +56,9 @@ func main() {
 
 	var query struct {
 		Master struct {
-			Get *graphql.String `graphql:"get(key: $key)"`
+      Tree struct {
+			  Get *graphql.String `graphql:"get(key: $key)"`
+      }
 		}
 	}
 
@@ -69,10 +71,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if query.Master.Get == nil {
+	if query.Master.Tree.Get == nil {
 		log.Println("NULL")
 	} else {
-		log.Println(*query.Master.Get)
+		log.Println(*query.Master.Tree.Get)
 	}
 }
 ```
