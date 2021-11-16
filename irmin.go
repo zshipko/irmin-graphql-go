@@ -65,10 +65,10 @@ func (ir *Irmin) Branch(name string) BranchRef {
 	}
 }
 
-// Master returns a BranchRef for the master branch
-func (ir *Irmin) Master() BranchRef {
+// Master returns a BranchRef for the main branch
+func (ir *Irmin) Main() BranchRef {
 	return BranchRef{
 		Irmin: ir,
-		name:  "master",
+		name:  "main",
 	}
 }
