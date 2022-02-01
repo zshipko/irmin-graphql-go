@@ -7,7 +7,7 @@ import (
 )
 
 func TestSet(t *testing.T) {
-	commit, err := main.Set(context.Background(), NewKey("a/b/c"), []byte("123"), nil)
+	commit, err := main.Set(context.Background(), NewPath("a/b/c"), []byte("123"), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -25,7 +25,7 @@ func TestSet(t *testing.T) {
 		t.Fatal("Commit hash doesn't match HEAD commit")
 	}
 
-	value, err := main.Get(context.Background(), NewKey("a/b/c"))
+	value, err := main.Get(context.Background(), NewPath("a/b/c"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,7 +41,7 @@ func TestRemove(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	commit, err := main.Remove(context.Background(), NewKey("a/b/c"), nil)
+	commit, err := main.Remove(context.Background(), NewPath("a/b/c"), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,7 +50,7 @@ func TestRemove(t *testing.T) {
 		t.Fatal("Expected new commit after remove")
 	}
 
-	value, err := main.Get(context.Background(), NewKey("a/b/c"))
+	value, err := main.Get(context.Background(), NewPath("a/b/c"))
 	if err != ErrNotFound {
 		t.Errorf("Expected a/b/c to be removed, instead got '%s'", value)
 	}
@@ -58,7 +58,7 @@ func TestRemove(t *testing.T) {
 }
 
 func TestPull(t *testing.T) {
-	main.Set(context.Background(), NewKey("README.md"), []byte("something"), nil)
+	main.Set(context.Background(), NewPath("README.md"), []byte("something"), nil)
 
 	commit, err := main.Pull(context.Background(), "git://github.com/zshipko/irmin-go", nil)
 	if err != nil {
@@ -69,7 +69,7 @@ func TestPull(t *testing.T) {
 		t.Fatal("Expected new commit hash")
 	}
 
-	value, _ := main.Get(context.Background(), NewKey("README.md"))
+	value, _ := main.Get(context.Background(), NewPath("README.md"))
 	readme, _ := ioutil.ReadFile("README.md")
 	if value == nil || string(value.Value) != string(readme) {
 		t.Fatal("Pull failed")
@@ -90,12 +90,12 @@ func TestPull(t *testing.T) {
 		t.Fatal("Incorrect list results")
 	}
 
-	commit, err = main.Set(context.Background(), NewKey("a/b/c"), []byte("123"), nil)
+	commit, err = main.Set(context.Background(), NewPath("a/b/c"), []byte("123"), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	x, err := main.GetTree(context.Background(), EmptyKey())
+	x, err := main.GetTree(context.Background(), EmptyPath())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -108,16 +108,16 @@ func TestPull(t *testing.T) {
 	test, _ := ioutil.ReadFile("test.sh")
 	if string(x["test.sh"].Value) != string(test) {
 		t.Log(x)
-		t.Fatal("Incorrect get_tree result for key test.sh")
+		t.Fatal("Incorrect get_tree result for path test.sh")
 	}
 
 	if string(x["a/b/c"].Value) != string("123") {
-		t.Fatal("Incorrect get_tree result for key a/b/c")
+		t.Fatal("Incorrect get_tree result for path a/b/c")
 	}
 }
 
 func TestSetTree(t *testing.T) {
-	key := EmptyKey()
+	path := EmptyPath()
 	tree := map[string]Contents{
 		"foo/bar/baz": Contents{
 			Value:    []byte("testing"),
@@ -125,7 +125,7 @@ func TestSetTree(t *testing.T) {
 		},
 	}
 
-	commit, err := main.SetTree(context.Background(), key, tree, nil)
+	commit, err := main.SetTree(context.Background(), path, tree, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,7 +134,7 @@ func TestSetTree(t *testing.T) {
 		t.Fatal("Invalid commit")
 	}
 
-	x, err := main.GetTree(context.Background(), key)
+	x, err := main.GetTree(context.Background(), path)
 
 	for k, v := range x {
 		if string(v.Value) != string(tree[k].Value) {

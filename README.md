@@ -55,7 +55,7 @@ func main() {
 	}
 
 	var query struct {
-		Master struct {
+	  Master struct {
       Tree struct {
 			  Get *graphql.String `graphql:"get(key: $key)"`
       }

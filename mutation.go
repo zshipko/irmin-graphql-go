@@ -31,7 +31,7 @@ func makeTreeArray(tree TreeMap) []TreeItem {
 		}
 
 		treeArray = append(treeArray, TreeItem{
-			"key":      graphql.String(k),
+			"path":      graphql.String(k),
 			"value":    value,
 			"metadata": meta,
 		})
@@ -40,15 +40,15 @@ func makeTreeArray(tree TreeMap) []TreeItem {
 	return treeArray
 }
 
-// Set a key
-func (br BranchRef) Set(ctx context.Context, key Key, value []byte, info *Info) (*Commit, error) {
+// Set a path
+func (br BranchRef) Set(ctx context.Context, path Path, value []byte, info *Info) (*Commit, error) {
 	type query struct {
-		Set Commit `graphql:"set(branch: $branch, key: $key, value: $value, info: $info)"`
+		Set Commit `graphql:"set(branch: $branch, path: $path, value: $value, info: $info)"`
 	}
 
 	var q query
 	vars := map[string]interface{}{
-		"key":   key.Arg(),
+		"path":   path.Arg(),
 		"value": graphql.String(value),
 		"info":  info,
 	}
@@ -61,17 +61,17 @@ func (br BranchRef) Set(ctx context.Context, key Key, value []byte, info *Info) 
 	return &q.Set, nil
 }
 
-// UpdateTree allows you to modify multiple keys at the same time
-func (br BranchRef) UpdateTree(ctx context.Context, key Key, tree TreeMap, info *Info) (*Commit, error) {
+// UpdateTree allows you to modify multiple paths at the same time
+func (br BranchRef) UpdateTree(ctx context.Context, path Path, tree TreeMap, info *Info) (*Commit, error) {
 	type query struct {
-		UpdateTree Commit `graphql:"update_tree(branch: $branch, key: $key, tree: $tree, info: $info)"`
+		UpdateTree Commit `graphql:"update_tree(branch: $branch, path: $path, tree: $tree, info: $info)"`
 	}
 
 	treeArray := makeTreeArray(tree)
 
 	var q query
 	vars := map[string]interface{}{
-		"key":  key.Arg(),
+		"path":  path.Arg(),
 		"tree": treeArray,
 		"info": info,
 	}
@@ -84,17 +84,17 @@ func (br BranchRef) UpdateTree(ctx context.Context, key Key, tree TreeMap, info 
 	return &q.UpdateTree, nil
 }
 
-// SetTree allows you to set multiple keys at the same time
-func (br BranchRef) SetTree(ctx context.Context, key Key, tree TreeMap, info *Info) (*Commit, error) {
+// SetTree allows you to set multiple paths at the same time
+func (br BranchRef) SetTree(ctx context.Context, path Path, tree TreeMap, info *Info) (*Commit, error) {
 	type query struct {
-		SetTree Commit `graphql:"set_tree(branch: $branch, key: $key, tree: $tree, info: $info)"`
+		SetTree Commit `graphql:"set_tree(branch: $branch, path: $path, tree: $tree, info: $info)"`
 	}
 
 	treeArray := makeTreeArray(tree)
 
 	var q query
 	vars := map[string]interface{}{
-		"key":  key.Arg(),
+		"path":  path.Arg(),
 		"tree": treeArray,
 		"info": info,
 	}
@@ -107,15 +107,15 @@ func (br BranchRef) SetTree(ctx context.Context, key Key, tree TreeMap, info *In
 	return &q.SetTree, nil
 }
 
-// SetAll allows you to set a key/value pair with metadata
-func (br BranchRef) SetAll(ctx context.Context, key Key, value []byte, metadata []byte, info *Info) (*Commit, error) {
+// SetAll allows you to set a path/value pair with metadata
+func (br BranchRef) SetAll(ctx context.Context, path Path, value []byte, metadata []byte, info *Info) (*Commit, error) {
 	type query struct {
-		SetAll Commit `graphql:"set(branch: $branch, key: $key, value: $value, metadata: $metadata, info: $info)"`
+		SetAll Commit `graphql:"set(branch: $branch, path: $path, value: $value, metadata: $metadata, info: $info)"`
 	}
 
 	var q query
 	vars := map[string]interface{}{
-		"key":      key.Arg(),
+		"path":      path.Arg(),
 		"value":    graphql.String(value),
 		"metadata": graphql.String(metadata),
 		"info":     info,
@@ -129,15 +129,15 @@ func (br BranchRef) SetAll(ctx context.Context, key Key, value []byte, metadata 
 	return &q.SetAll, nil
 }
 
-// Remove a key
-func (br BranchRef) Remove(ctx context.Context, key Key, info *Info) (*Commit, error) {
+// Remove a path
+func (br BranchRef) Remove(ctx context.Context, path Path, info *Info) (*Commit, error) {
 	type query struct {
-		Remove Commit `graphql:"remove(branch: $branch, key: $key, info: $info)"`
+		Remove Commit `graphql:"remove(branch: $branch, path: $path, info: $info)"`
 	}
 
 	var q query
 	vars := map[string]interface{}{
-		"key":  key.Arg(),
+		"path":  path.Arg(),
 		"info": info,
 	}
 
