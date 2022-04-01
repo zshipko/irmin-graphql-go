@@ -6,24 +6,24 @@ import (
 )
 
 var client *Irmin
-var master BranchRef
+var main BranchRef
 
 func init() {
 	client = New("http://127.0.0.1:8080/graphql", nil)
 	if client == nil {
 		panic("Invalid client")
 	}
-	master = client.Master()
+	main = client.Main()
 }
 
-func TestMaster(t *testing.T) {
-	info, err := master.Info(context.Background())
+func TestMain(t *testing.T) {
+	info, err := main.Info(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if string(info.Name) != "master" {
-		t.Error("Expected master branch")
+	if string(info.Name) != "main" {
+		t.Error("Expected main branch")
 	}
 }
 

@@ -28,7 +28,7 @@ type Contents struct {
 // TreeMap is used in GetTree and SetTree to represent a listing of tree nodes
 type TreeMap map[string]Contents
 
-// ErrNotFound is returned when a key is not available
+// ErrNotFound is returned when a path is not available
 var ErrNotFound = errors.New("Not found")
 
 // Info - branch(name: $branch)
@@ -46,25 +46,25 @@ func (br BranchRef) Info(ctx context.Context) (*Branch, error) {
 	return &q.Branch, nil
 }
 
-// GetTree - branch(name: $branch) { tree { get_tree(key: $key) { list_contents_recursively { key, value, metadata } } } }
-func (br BranchRef) GetTree(ctx context.Context, key Key) (TreeMap, error) {
+// GetTree - branch(name: $branch) { tree { get_tree(path: $path) { list_contents_recursively { path, value, metadata } } } }
+func (br BranchRef) GetTree(ctx context.Context, path Path) (TreeMap, error) {
 	type query struct {
 		Branch struct {
 			Tree struct {
 				GetTree struct {
 					List []struct {
-						Key      graphql.String `graphql:"key"`
+						Path      graphql.String `graphql:"path"`
 						Value    graphql.String `graphql:"value"`
 						Metadata graphql.String `graphql:"metadata"`
 					} `graphql:"list_contents_recursively"`
-				} `graphql:"get_tree(key: $key)"`
+				} `graphql:"get_tree(path: $path)"`
 			} `graphql:"tree"`
 		} `graphql:"branch(name: $branch)"`
 	}
 
 	var q query
 	vars := map[string]interface{}{
-		"key": key.Arg(),
+		"path": path.Arg(),
 	}
 
 	err := br.Query(ctx, &q, vars)
@@ -75,7 +75,7 @@ func (br BranchRef) GetTree(ctx context.Context, key Key) (TreeMap, error) {
 	items := map[string]Contents{}
 
 	for _, v := range q.Branch.Tree.GetTree.List {
-		items[NewKey(string(v.Key)).ToString()] = Contents{
+		items[NewPath(string(v.Path)).ToString()] = Contents{
 			Value:    []byte(v.Value),
 			Metadata: []byte(v.Metadata),
 		}
@@ -84,22 +84,22 @@ func (br BranchRef) GetTree(ctx context.Context, key Key) (TreeMap, error) {
 	return items, nil
 }
 
-// Get - branch(name: $branch) { tree { get_contents(key: $key) { value, metadata } } }
-func (br BranchRef) Get(ctx context.Context, key Key) (*Contents, error) {
+// Get - branch(name: $branch) { tree { get_contents(path: $path) { value, metadata } } }
+func (br BranchRef) Get(ctx context.Context, path Path) (*Contents, error) {
 	type query struct {
 		Branch struct {
 			Tree struct {
 				Get *struct {
 					Value    graphql.String `graphql:"value"`
 					Metadata graphql.String `graphql:"metadata"`
-				} `graphql:"get_contents(key: $key)"`
+				} `graphql:"get_contents(path: $path)"`
 			} `graphql:"tree"`
 		} `graphql:"branch(name: $branch)"`
 	}
 
 	var q query
 	vars := map[string]interface{}{
-		"key": key.Arg(),
+		"path": path.Arg(),
 	}
 
 	err := br.Query(ctx, &q, vars)
@@ -117,18 +117,18 @@ func (br BranchRef) Get(ctx context.Context, key Key) (*Contents, error) {
 	}, nil
 }
 
-// List returns a list of the values stored under the specified key
-func (br BranchRef) List(ctx context.Context, key Key) (map[string][]byte, error) {
+// List returns a list of the values stored under the specified path
+func (br BranchRef) List(ctx context.Context, path Path) (map[string][]byte, error) {
 	type query struct {
 		Branch struct {
 			Head struct {
 				Tree struct {
 					GetTree struct {
 						List []struct {
-							Key   graphql.String
+							Path   graphql.String
 							Value graphql.String
 						} `graphql:"list"`
-					} `graphql:"get_tree(key: $key)"`
+					} `graphql:"get_tree(path: $path)"`
 				} `graphql:"tree"`
 			} `graphql:"head"`
 		} `graphql:"branch(name: $branch)"`
@@ -136,7 +136,7 @@ func (br BranchRef) List(ctx context.Context, key Key) (map[string][]byte, error
 
 	var q query
 	vars := map[string]interface{}{
-		"key": key.Arg(),
+		"path": path.Arg(),
 	}
 
 	err := br.Query(ctx, &q, vars)
@@ -146,7 +146,7 @@ func (br BranchRef) List(ctx context.Context, key Key) (map[string][]byte, error
 
 	items := map[string][]byte{}
 	for _, x := range q.Branch.Head.Tree.GetTree.List {
-		items[NewKey(string(x.Key)).ToString()] = []byte(x.Value)
+		items[NewPath(string(x.Path)).ToString()] = []byte(x.Value)
 	}
 
 	return items, nil
