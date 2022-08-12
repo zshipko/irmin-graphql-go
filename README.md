@@ -1,16 +1,16 @@
-# irmin-go
+# irmin-graphql-go
 
 Go bindings to [Irmin](https://github.com/mirage/irmin) using GraphQL.
 
 ## Installation
 
 ```shell
-$ go get -u github.com/zshipko/irmin-go
+$ go get -u github.com/zshipko/irmin-graphql-go
 ```
 
 ## Getting started
 
-The following example will print the commit hash of the current `HEAD` of the master branch:
+The following example will print the commit hash of the current `HEAD` of the main branch:
 
 ```go
 package main
@@ -19,7 +19,7 @@ import (
     "fmt"
     "context"
 
-    "github.com/zshipko/irmin-go"
+    "github.com/zshipko/irmin-graphql-go"
 )
 
 func main(){
@@ -28,8 +28,8 @@ func main(){
         panic("Unable to connect to irmin-graphql server")
     }
 
-    master := client.Master(context.Background())
-    fmt.Println(master.Head.Hash)
+    main := client.Main(context.Background())
+    fmt.Println(main.Head.Hash)
 }
 ```
 
@@ -55,7 +55,7 @@ func main() {
 	}
 
 	var query struct {
-	  Master struct {
+	  Main struct {
       Tree struct {
 			  Get *graphql.String `graphql:"get(key: $key)"`
       }
@@ -71,10 +71,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if query.Master.Tree.Get == nil {
+	if query.Main.Tree.Get == nil {
 		log.Println("NULL")
 	} else {
-		log.Println(*query.Master.Tree.Get)
+		log.Println(*query.Main.Tree.Get)
 	}
 }
 ```

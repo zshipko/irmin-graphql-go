@@ -65,7 +65,7 @@ func (ir *Irmin) Branch(name string) BranchRef {
 	}
 }
 
-// Master returns a BranchRef for the main branch
+// Maain returns a BranchRef for the main branch
 func (ir *Irmin) Main() BranchRef {
 	return BranchRef{
 		Irmin: ir,
